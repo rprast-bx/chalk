@@ -11,18 +11,27 @@ import std/tables
 import std/hashes
 import ../config, ../plugin_api
 
+type TechStackType* = enum
+    database = 1,
+    webServer = 2,
+    protocol = 3,
+    language = 4
+
+proc hash(t: TechStackType): Hash =
+    result = int(t)
+
 type DatabaseType* = enum
-    firebird = 1,
-    hypersonicSQL = 2,
-    ibmDb2 = 3,
-    microsoftAccess = 4,
-    microsoftSQLServer = 5,
-    mongoDB = 6,
-    mySQL = 7,
-    oracle = 8,
-    postgreSQL = 9,
-    sqlite = 10,
-    sysbase = 11
+    firebird = 100,
+    hypersonicSQL = 101,
+    ibmDb2 = 102,
+    microsoftAccess = 103,
+    microsoftSQLServer = 104,
+    mongoDB = 105,
+    mySQL = 106,
+    oracle = 107,
+    postgreSQL = 108,
+    sqlite = 109,
+    sysbase = 110
 
 # we need this as DatabaseType is not a simple standard type and needs
 # to be used as a key to the dictionary
@@ -30,7 +39,19 @@ proc hash(t: DatabaseType): Hash =
     result = int(t)
 
 type WebServerType* = enum
-    apache, nginx, iis
+    apache = 200,
+    nginx = 201,
+    iis = 202
+
+proc hash(t: WebServerType): Hash =
+    result = int(t)
+
+
+type ProtocolType* = enum
+    ldap = 300
+
+proc hash(t: ProtocolType): Hash =
+    result = int(t)
 
 #
 # Firebird
@@ -95,13 +116,20 @@ let RE_SQLITE* = re"\bsqlite:\/\/\b"
 # Sysbase
 #
 
-#
-# SQLite
-#
-let US_SSN* = re"\b(?!666|000|9\d{2})\d{3}-(?!00)\d{2}-(?!0{4})\d{4}\b"
-
 let dbRegexDict* = {
-    mySQL: @[RE_MYSQL, RE_PYTHON_MYSQL, RE_GO_MYSQL, RE_JS_MYSQL, RE_JAVA_MYSQL]
+    mySQL: @[RE_MYSQL, RE_PYTHON_MYSQL, RE_GO_MYSQL, RE_JS_MYSQL, RE_JAVA_MYSQL],
+    firebird: @[RE_FIREBIRD_GENERIC, RE_FIREBIRD_PYTHON],
+    sqlite: @[RE_SQLITE],
+}.toTable()
+
+let dbResultDict* = {
+    mySQL: false,
+    firebird: false,
+    sqlite: false,
+}.toTable()
+
+let techStackResult* = {
+    database: dbResultDict,
 }.toTable()
 
 template checkLine(seen: bool, line: string, regexes: seq[Regex]) =
@@ -181,26 +209,27 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
     ChalkDict {.cdecl.} =
 
   result = ChalkDict()
-  for db in names:
-    dbDetected[db] = false
+  # for db in names:
+  #   dbDetected[db] = false
 
-  for item in getContextDirectories():
-    for db in names:
-      trace("$\n## scanning for " & db)
-      let fpath = expandFilename(item)
-      if fpath.dirExists():
-        scanDirectory(fpath, db)
-        trace(" |- " & fpath & " " & $(dbDetected[db]))
-      else:
-        let (head, _) = splitPath(fPath)
-        if head.dirExists():
-          scanDirectory(head, db)
-          trace(" |- " & head & " " & $(dbDetected[db]))
-  trace($(dbDetected))
+  # for item in getContextDirectories():
+  #   for db in names:
+  #     trace("$\n## scanning for " & db)
+  #     let fpath = expandFilename(item)
+  #     if fpath.dirExists():
+  #       scanDirectory(fpath, db)
+  #       trace(" |- " & fpath & " " & $(dbDetected[db]))
+  #     else:
+  #       let (head, _) = splitPath(fPath)
+  #       if head.dirExists():
+  #         scanDirectory(head, db)
+  #         trace(" |- " & head & " " & $(dbDetected[db]))
+  # trace($(dbDetected))
   try:
-    result["_INFERRED_TECH_STACKS"] = pack("Foo")
+    result["_INFERRED_TECH_STACKS"] = pack(techStackResult)
   except:
-    trace("Could not pack names")
+    dumpExOnDebug()
+    trace("Testing packing")
 
 proc loadtechStackGeneric*() =
   newPlugin("techStackGeneric", rtHostCallback = RunTimeHostCb(techStackGeneric))
