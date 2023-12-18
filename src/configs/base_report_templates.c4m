@@ -21,6 +21,7 @@ We really don't recommend this, but it's also valid to start with this
 report and subtract from it.
 """
 
+  key._INFERRED_TECH_STACKS.use              = true
   key.MAGIC.use                              = true
   key.CHALK_VERSION.use                      = true
   key.DATE_CHALKED.use                       = true
@@ -388,6 +389,7 @@ report and subtract from it.
   key._AWS_RESERVATION_ID.use                = true
   key._AWS_SPOT_INSTANCE_ACTION.use          = true
   key._AWS_SPOT_TERMINATION_TIME.use         = true
+  key._INFERRED_TECH_STACKS.use              = true
   key._CHALK_EXTERNAL_ACTION_AUDIT.use       = true
   key._CHALK_RUN_TIME.use                    = true
   key.$CHALK_CONFIG.use                      = true
@@ -410,6 +412,7 @@ doc: """
   redundant, like _OP_ALL_IMAGE_METADATA. This does report stuff that's
   more expensive to capture (like full ps when available).
 """
+  key._INFERRED_TECH_STACKS.use              = true
   # Host keys.
   key.CHALK_VERSION.use                       = true
   key.DATE_CHALKED.use                        = true
@@ -451,6 +454,7 @@ doc: """
   key._OP_CONFIG.use                          = true
   key._UNMARKED.use                           = true
   key._OP_CHALKER_COMMIT_ID.use               = true
+  key._INFERRED_TECH_STACKS.use              = true
   key._OP_CHALKER_VERSION.use                 = true
   key._OP_PLATFORM.use                        = true
   key._OP_HOSTNAME.use                        = true
@@ -524,6 +528,7 @@ doc: """
   key._AWS_RESOURCE_DOMAIN.use                       = true
   key._AWS_SPOT_INSTANCE_ACTION.use                  = true
   key._AWS_SPOT_TERMINATION_TIME.use                 = true
+  key._INFERRED_TECH_STACKS.use              = true
   key._AWS_SUBNET_ID.use                             = true
   key._AWS_TAGS.use                                  = true
   key._AWS_VPC_ID.use                                = true
@@ -832,6 +837,7 @@ spammy.  It reports all PS info, but only if definitely running in a
 container.
 """
 
+  key._INFERRED_TECH_STACKS.use              = true
   key._OP_HOST_REPORT_KEYS.use                = false
   key._OP_ARP_TABLE.use                       = false
   key._OP_CPU_INFO.use                        = false
@@ -950,6 +956,7 @@ container.
   key._AWS_RESOURCE_DOMAIN.use                       = true
   key._AWS_SPOT_INSTANCE_ACTION.use                  = true
   key._AWS_SPOT_TERMINATION_TIME.use                 = true
+  key._INFERRED_TECH_STACKS.use              = true
   key._AWS_SUBNET_ID.use                             = true
   key._AWS_TAGS.use                                  = true
   key._AWS_VPC_ID.use                                = true
@@ -1246,6 +1253,7 @@ When choosing between two identical keys, we drop the chalk-time key,
 and keep the run-time key.
 """
 
+key._INFERRED_TECH_STACKS.use              = true
 
   key._OP_HOST_REPORT_KEYS.use                = false
   key._OP_ARP_TABLE.use                       = false
@@ -1298,6 +1306,7 @@ and keep the run-time key.
   key._OP_ARGV.use                            = true
   key._OP_CONFIG.use                          = true
   key._UNMARKED.use                           = true
+  key._INFERRED_TECH_STACKS.use              = true
   key._OP_CHALKER_COMMIT_ID.use               = true
   key._OP_CHALKER_VERSION.use                 = true
   key._OP_PLATFORM.use                        = true
@@ -1363,6 +1372,7 @@ and keep the run-time key.
   key._AWS_RESOURCE_DOMAIN.use                       = true
   key._AWS_SPOT_INSTANCE_ACTION.use                  = true
   key._AWS_SPOT_TERMINATION_TIME.use                 = true
+  key._INFERRED_TECH_STACKS.use              = true
   key._AWS_SUBNET_ID.use                             = true
   key._AWS_TAGS.use                                  = true
   key._AWS_VPC_ID.use                                = true
@@ -1645,6 +1655,7 @@ report_template unknown_docker {
 Intended for reporting only basic identifying information for docker commands
 that do not generate a chalk report.
 """
+  key._INFERRED_TECH_STACKS.use              = true
   key._OPERATION.use                          = true
   key._ACTION_ID.use                          = true
   key._DATETIME.use                           = true
@@ -1667,6 +1678,7 @@ report_template push_default {
   You can certainly collect a lot more data here, but we expect it
   should usually be redundant w/ the info you collected during a build.
 """
+  key._INFERRED_TECH_STACKS.use              = true
   key._OPERATION.use                          = true
   ~key._CURRENT_HASH.use                      = true
   key._STORE_URI.use                          = true
@@ -1689,6 +1701,7 @@ report_template audit {
 
   Note that in the default configuration, "publish_audit" is OFF.
 """
+  key._INFERRED_TECH_STACKS.use              = true
   key._OPERATION.use                          = true
   key._ACTION_ID.use                          = true
   key._TIMESTAMP.use                          = true
@@ -1722,6 +1735,7 @@ report_template terminal_insert {
 The summary report that outputs to your terminal by default, when
 running insert commands.
 """
+  key._INFERRED_TECH_STACKS.use              = true
   key._OPERATION.use                          = true
   key._DATETIME.use                           = true
   key._CHALKS.use                             = true
@@ -1772,6 +1786,7 @@ report_template terminal_rest {
 The summary report that outputs to your terminal by default, when
 running commands that do NOT insert chalk marks.
 """
+  key._INFERRED_TECH_STACKS.use              = true
   key._OPERATION.use                          = true
   key._DATETIME.use                           = true
   key._CHALKS.use                             = true

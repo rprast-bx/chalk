@@ -212,11 +212,19 @@ Captures metadata from cloud instances.
 """
 }
 
+plugin techStackGeneric {
+    enabled:         true
+    post_run_keys:   ["_INFERRED_TECH_STACKS"]
+    doc: """TODO
+"""
+}
+
 plugin aws_ecs {
     enabled:         true
     pre_run_keys:    ["CLOUD_METADATA_WHEN_CHALKED"]
     post_run_keys:   ["_OP_CLOUD_METADATA"]
     doc: """
+
 Captures metadata from the primary endpoint for the original ECS
 metdata interface.
 """

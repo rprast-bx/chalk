@@ -1103,6 +1103,17 @@ collecting this information.
 """
 }
 
+keyspec _INFERRED_TECH_STACKS {
+    kind:             RunTimeHost
+    type:             string
+    standard:         true
+    since:            "0.2.2"
+    shortdoc: "TODO"
+    doc:              """
+TODO
+"""
+}
+
 keyspec SAST {
     kind:             ChalkTimeArtifact
     type:             dict[string, `x]
