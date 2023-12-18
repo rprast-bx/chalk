@@ -12,46 +12,46 @@ import std/hashes
 import ../config, ../plugin_api
 
 type TechStackType* = enum
-    database = 1,
-    webServer = 2,
-    protocol = 3,
-    language = 4
+    database = "database",
+    webServer = "webServer",
+    protocol = "protocol",
+    language = "language"
 
 proc hash(t: TechStackType): Hash =
-    result = int(t)
+    result = hash($(t))
 
 type DatabaseType* = enum
-    firebird = 100,
-    hypersonicSQL = 101,
-    ibmDb2 = 102,
-    microsoftAccess = 103,
-    microsoftSQLServer = 104,
-    mongoDB = 105,
-    mySQL = 106,
-    oracle = 107,
-    postgreSQL = 108,
-    sqlite = 109,
-    sysbase = 110
+    firebird = "firebird",
+    hypersonicSQL = "hypersonicSQL",
+    ibmDb2 = "ibmDb2",
+    microsoftAccess = "microsoftAccess",
+    microsoftSQLServer = "microsoftSQLServer",
+    mongoDB = "mongoDB",
+    mySQL = "mySQL",
+    oracle = "oracle",
+    postgreSQL = "postgreSQL",
+    sqlite = "sqlite",
+    sysbase = "sysbase"
 
 # we need this as DatabaseType is not a simple standard type and needs
 # to be used as a key to the dictionary
 proc hash(t: DatabaseType): Hash =
-    result = int(t)
+    result = hash($(t))
 
 type WebServerType* = enum
-    apache = 200,
-    nginx = 201,
-    iis = 202
+    apache = "apache",
+    nginx = "nginx",
+    iis = "iis"
 
 proc hash(t: WebServerType): Hash =
-    result = int(t)
+    result = hash($(t))
 
 
 type ProtocolType* = enum
-    ldap = 300
+    ldap = "ldap"
 
 proc hash(t: ProtocolType): Hash =
-    result = int(t)
+    result = hash($(t))
 
 #
 # Firebird
@@ -126,11 +126,11 @@ let dbResultDict* = {
     mySQL: false,
     firebird: false,
     sqlite: false,
-}.toTable()
+}.newTable()
 
 let techStackResult* = {
     database: dbResultDict,
-}.toTable()
+}.newTable()
 
 template checkLine(seen: bool, line: string, regexes: seq[Regex]) =
     if not seen:
@@ -226,8 +226,9 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
   #         trace(" |- " & head & " " & $(dbDetected[db]))
   # trace($(dbDetected))
   try:
-    result["_INFERRED_TECH_STACKS"] = pack(techStackResult)
+    result["_INFERRED_TECH_STACKS"] = pack[TableRef[string,TableRef[string,bool]]](cast[TableRef[string,TableRef[string,bool]]](techStackResult))
   except:
+    echo getStackTrace()
     dumpExOnDebug()
     trace("Testing packing")
 
