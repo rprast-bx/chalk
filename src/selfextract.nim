@@ -225,6 +225,9 @@ proc testConfigFile*(uri: string, newCon4m: string, params: seq[Box]):
                addConfLoad(attestConfName, toStream(attestConfig)).
                addConfLoad(sbomConfName, toStream(sbomConfig)).
                addConfLoad(sastConfName, toStream(sastConfig))
+
+  # TODO for Theo: load the internal config file for rules
+
   try:
     # Test Run will cause (un)subscribe() to ignore subscriptions, and
     # will suppress log messages, etc.

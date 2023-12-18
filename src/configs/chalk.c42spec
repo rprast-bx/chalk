@@ -453,6 +453,35 @@ failure, and no other keys will be checked.
   }
 }
 
+object coderule {
+  user_def_ok:   false
+  gen_fieldname: "codeRules"
+  gen_typename:  "CodeRule"
+  gen_setters:   false
+
+  field regex {
+    type:    string
+    require: true
+  }
+  field filetypes {
+    type:    list[string]
+    require: false
+  }
+  allow scope
+}
+
+singleton scope {
+  user_def_ok: false
+  gen_fieldname: "ruleScope"
+  gen_typename:  "RuleScope"
+  gen_setters: false
+
+  field head {
+    type:    int
+    require: false
+  }
+}
+
 object keyspec {
   user_def_ok:   false
   gen_fieldname: "keyspecs"
@@ -2071,7 +2100,8 @@ root {
   allow env_config
   allow source_marks
   allow cloud_provider
-
+  allow coderule
+  
   shortdoc: "Chalk Configuration Options"
 
   doc: """
