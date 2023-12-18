@@ -11,47 +11,40 @@ import std/tables
 import std/hashes
 import ../config, ../plugin_api
 
-type TechStackType* = enum
-    database = "database",
-    webServer = "webServer",
-    protocol = "protocol",
+# rule identifiers by filetype
+var ftRules = newTable[string, seq[string]]()
+# tech stack rules by each identifier
+var tsRules = newTable[string, TechStackRule]()
+# regex by name
+var regexes = newTable[string, Regex]()
+# category: [subcategory: name]
+var categories = newTable[string, TableRef[string, string]]()
+
+var detected = initTable[string, bool]()
+
+const
+    database = "database"
+    webServer = "webServer"
+    protocol = "protocol"
     language = "language"
-
-proc hash(t: TechStackType): Hash =
-    result = hash($(t))
-
-type DatabaseType* = enum
-    firebird = "firebird",
-    hypersonicSQL = "hypersonicSQL",
-    ibmDb2 = "ibmDb2",
-    microsoftAccess = "microsoftAccess",
-    microsoftSQLServer = "microsoftSQLServer",
-    mongoDB = "mongoDB",
-    mySQL = "mySQL",
-    oracle = "oracle",
-    postgreSQL = "postgreSQL",
-    sqlite = "sqlite",
+    # db types
+    firebird = "firebird"
+    hypersonicSQL = "hypersonicSQL"
+    ibmDb2 = "ibmDb2"
+    microsoftAccess = "microsoftAccess"
+    microsoftSQLServer = "microsoftSQLServer"
+    mongoDB = "mongoDB"
+    mySQL = "mySQL"
+    oracle = "oracle"
+    postgreSQL = "postgreSQL"
+    sqlite = "sqlite"
     sysbase = "sysbase"
-
-# we need this as DatabaseType is not a simple standard type and needs
-# to be used as a key to the dictionary
-proc hash(t: DatabaseType): Hash =
-    result = hash($(t))
-
-type WebServerType* = enum
-    apache = "apache",
-    nginx = "nginx",
+    # web server types
+    apache = "apache"
+    nginx = "nginx"
     iis = "iis"
-
-proc hash(t: WebServerType): Hash =
-    result = hash($(t))
-
-
-type ProtocolType* = enum
+    # protocol types
     ldap = "ldap"
-
-proc hash(t: ProtocolType): Hash =
-    result = hash($(t))
 
 #
 # Firebird
@@ -118,13 +111,13 @@ let RE_SQLITE* = re"\bsqlite:\/\/\b"
 
 let dbRegexDict* = {
     mySQL: @[RE_MYSQL, RE_PYTHON_MYSQL, RE_GO_MYSQL, RE_JS_MYSQL, RE_JAVA_MYSQL],
-    firebird: @[RE_FIREBIRD_GENERIC, RE_FIREBIRD_PYTHON],
+    # firebird: @[RE_FIREBIRD_GENERIC, RE_FIREBIRD_PYTHON],
     sqlite: @[RE_SQLITE],
 }.toTable()
 
 let dbResultDict* = {
     mySQL: false,
-    firebird: false,
+    # firebird: false,
     sqlite: false,
 }.newTable()
 
@@ -147,7 +140,6 @@ let names = ["firebird", "hypersonicSQL", "ibmDb2", "miscrosoftAccess",
 # only parse top 20 lines for imports
 let head = 20
 
-var dbDetected = initTable[string, bool]()
 
 proc scanFile(filePath: string, kind: string) =
     var strm = newFileStream(filePath, fmRead)
@@ -164,7 +156,7 @@ proc scanFile(filePath: string, kind: string) =
             break
         i += 1
 
-        if not dbDetected[kind]:
+        if not detected[kind]:
             if kind == "mySQL":
                 checkLine(foundKind, line, dbRegexDict[mySQL])
             elif kind == "firebird":
@@ -183,7 +175,7 @@ proc scanFile(filePath: string, kind: string) =
                 checkLine(foundKind, line, @[RE_ORACLE])
 
             if foundKind:
-                dbDetected[kind] = true
+                detected[kind] = true
                 return
 
         if foundKind:
@@ -193,10 +185,10 @@ proc scanFile(filePath: string, kind: string) =
 
 # FIXME check that we don't fall into infinite loops with a symlink here
 proc scanDirectory(directory: string, kind: string) =
-    if dbDetected[kind]:
+    if detected[kind]:
         return
     for filePath in walkDir(directory):
-        if dbDetected[kind]:
+        if detected[kind]:
             break
         if filePath.kind == pcFile:
             scanFile(filePath.path, kind)
@@ -209,8 +201,11 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
     ChalkDict {.cdecl.} =
 
   result = ChalkDict()
-  # for db in names:
-  #   dbDetected[db] = false
+
+  for category, subcategories in categories:
+    for subcategory, regex_name in subcategories:
+        echo category, "_", subcategory, "_", regex_name
+        detected[category & "_" & subcategory] = false
 
   # for item in getContextDirectories():
   #   for db in names:
@@ -218,13 +213,13 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
   #     let fpath = expandFilename(item)
   #     if fpath.dirExists():
   #       scanDirectory(fpath, db)
-  #       trace(" |- " & fpath & " " & $(dbDetected[db]))
+  #       trace(" |- " & fpath & " " & $(detected[db]))
   #     else:
   #       let (head, _) = splitPath(fPath)
   #       if head.dirExists():
   #         scanDirectory(head, db)
-  #         trace(" |- " & head & " " & $(dbDetected[db]))
-  # trace($(dbDetected))
+  #         trace(" |- " & head & " " & $(detected[db]))
+  # trace($(detected))
   try:
     result["_INFERRED_TECH_STACKS"] = pack[TableRef[string,TableRef[string,bool]]](cast[TableRef[string,TableRef[string,bool]]](techStackResult))
   except:
@@ -233,4 +228,29 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
     trace("Testing packing")
 
 proc loadtechStackGeneric*() =
+  for key, val in chalkConfig.techStackRules:
+    tsRules[key] = val
+    regexes[key] = re(val.getRegex())
+    echo "rule name = ", key
+    let category = val.getCategory()
+    if contains(categories, category):
+        categories[category][val.getSubcategory()] = key
+    else:
+        categories[category] = newTable[string, string]()
+        categories[category][val.getSubcategory()] = key
+    if val.fileScope != nil:
+        if val.fileScope.getHead().isSome():
+            echo "head = ", val.fileScope.getHead().get()
+            let filetypes = val.fileScope.getFileTypes()
+            if filetypes.isSome():
+                for ft in filetypes.get():
+                    if contains(ftRules, ft):
+                        ftRules[ft].add(key)
+                    else:
+                        ftRules[ft] = @[key]
+    else:
+        if contains(ftRules, "all"):
+            ftRules["all"].add(key)
+        else:
+            ftRules["all"] = @[key]
   newPlugin("techStackGeneric", rtHostCallback = RunTimeHostCb(techStackGeneric))

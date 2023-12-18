@@ -29,10 +29,3 @@ cloud_provider {
   cloud_instance_hw_identifiers {
   }
 }
-
-coderule foo {
-  regex: "^.*$"
-  scope {
-    head: 10
-  }
-}

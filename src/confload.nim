@@ -189,7 +189,8 @@ proc loadAllConfigs*() =
 
   stack.addConfLoad(sbomConfName,   toStream(sbomConfig),   checkNone)
   stack.addConfLoad(sastConfName,   toStream(sastConfig),   checkNone)
-  # TODO for Theo: load the internal config file for rules
+  stack.addConfLoad(techStackConfName,   toStream(techStackConfig),   checkNone)
+
 
   stack.addCallback(loadLocalStructs)
   doRun()

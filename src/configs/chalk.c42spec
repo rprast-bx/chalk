@@ -453,28 +453,60 @@ failure, and no other keys will be checked.
   }
 }
 
-object coderule {
+valid_tech_stack_categories := ["database", "webServer", "protocol"]
+valid_tech_stack_database_types := ["firebird", "hypersonicSQL",
+    "ibmDb2", "microsoftAccess", "microsoftSQLServer",
+     "mongoDB", "mySQL", "oracle", "postgreSQL","sqlite", "sysbase", "other"]
+
+valid_tech_stack_web_server_types := ["apache", "nginx", "iis"]
+valid_tech_stack_protocol_types := ["ldap"]
+
+object tech_stack_rule {
   user_def_ok:   false
-  gen_fieldname: "codeRules"
-  gen_typename:  "CodeRule"
+  gen_fieldname: "techStackRules"
+  gen_typename:  "TechStackRule"
   gen_setters:   false
 
   field regex {
     type:    string
     require: true
   }
+
+  field description {
+    type:    string
+    default: ""
+  }
+
+  field category {
+    type: string
+    require: true
+    choice:   valid_tech_stack_categories
+  }
+
+  field subcategory {
+    type: string
+    require: true
+    choice: valid_tech_stack_database_types
+  }
+  allow file_scope
+}
+
+singleton file_scope {
+  user_def_ok: false
+  gen_fieldname: "fileScope"
+  gen_typename:  "FileScope"
+  gen_setters: false
+
+  # XXX exclude some filetypes
   field filetypes {
     type:    list[string]
     require: false
   }
-  allow scope
-}
 
-singleton scope {
-  user_def_ok: false
-  gen_fieldname: "ruleScope"
-  gen_typename:  "RuleScope"
-  gen_setters: false
+  field exclude {
+    type:    list[string]
+    require: false
+  }
 
   field head {
     type:    int
@@ -2100,8 +2132,8 @@ root {
   allow env_config
   allow source_marks
   allow cloud_provider
-  allow coderule
-  
+  allow tech_stack_rule
+
   shortdoc: "Chalk Configuration Options"
 
   doc: """

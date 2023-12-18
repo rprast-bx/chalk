@@ -224,7 +224,8 @@ proc testConfigFile*(uri: string, newCon4m: string, params: seq[Box]):
                addConfLoad(ioConfName,   toStream(ioConfig)).
                addConfLoad(attestConfName, toStream(attestConfig)).
                addConfLoad(sbomConfName, toStream(sbomConfig)).
-               addConfLoad(sastConfName, toStream(sastConfig))
+               addConfLoad(sastConfName, toStream(sastConfig)).
+               addConfLoad(techStackConfName, toStream(techStackConfig))
 
   # TODO for Theo: load the internal config file for rules
 
@@ -265,6 +266,7 @@ proc paramsToBox(a: bool, b, c: string, d: Con4mType, e: Box): Box =
   return pack(arr)
 
 const nocache = ["configs/ioconfig.c4m", "configs/sastconfig.c4m",
+                "configs/techstackconfig.c4m",
                  "[embedded config]", "configs/base_*.c4m",
                  "configs/sbomconfig.c4m", "configs/attestation.c4m",
                  "configs/getopts.c4m"]

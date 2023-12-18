@@ -108,15 +108,6 @@ proc sysGetChalkTimeArtifactInfo*(self: Plugin, obj: ChalkObj):
 
     result.setIfNeeded("OLD_CHALK_METADATA_ID", idFormat(h))
 
-  for key, val in chalkConfig.codeRules:
-    echo "rule name = ", key
-    echo "regex     = ", val.getRegex()
-    if val.getFileTypes().isSome():
-      echo "filetypes = ", val.getFileTypes().get()
-    if val.ruleScope != nil:
-      if val.ruleScope.getHead().isSome():
-        echo "head = ", val.ruleScope.getHead().get()
-
 proc applySubstitutions(obj: ChalkObj) {.inline.} =
   # Apply {}-style substitutions to artifact chalking keys where appropriate.
   let
