@@ -1,14 +1,45 @@
+common_exclude_files := [".pyc", ".tmp", ".md", ".txt", ".html", ".c4m", ".lock"]
+head_limit := 25
+
 tech_stack_rule sqlite_generic {
   regex: "sqlite:\/\/"
   category: "database"
   subcategory: "sqlite"
   description: "sqlite uris"
   file_scope {
-    exclude: [".pyc", ".tmp", ".md", ".txt", ".html"]
+    exclude: common_exclude_files
   }
 }
 
-import_limit := 20
+tech_stack_rule postgresql_generic {
+  regex: "\b(postgresql|pgclient|pgdatabase)\b"
+  category: "database"
+  subcategory: "postgreSQL"
+  description: "postgresSQL common regex"
+  file_scope {
+    exclude: common_exclude_files
+  }
+}
+
+tech_stack_rule oracle_generic {
+  regex: "\b(oracledb|oraclient|oradatabase)\b"
+  category: "database"
+  subcategory: "oracle"
+  description: "oracle common regex"
+  file_scope {
+    exclude: common_exclude_files
+  }
+}
+
+tech_stack_rule mongodb_generic {
+  regex: "\b(mongodb|mongoclient|mongodbdriver|mongodatabase)\b"
+  category: "database"
+  subcategory: "mongoDB"
+  description: "mongoDB common regex"
+  file_scope {
+    exclude: common_exclude_files
+  }
+}
 
 tech_stack_rule mysql_python {
   regex: "^import\s+(mysql.connector|pymysql|MySQLdb)\b"
@@ -17,6 +48,96 @@ tech_stack_rule mysql_python {
   description: "Import of common packages related to mysql in Python"
   file_scope {
     filetypes: [".py"]
-    head: 20
+    head: head_limit
+  }
+}
+
+tech_stack_rule mysql_generic {
+  regex: "mysql:\/\/[a-zA-Z0-9_]+:[a-zA-Z0-9_]+@[\w\.]+\/[a-zA-Z0-9_]+"
+  category: "database"
+  subcategory: "mySQL"
+  description: "generic mysql uri"
+  file_scope {
+    exclude: common_exclude_files
+  }
+}
+
+tech_stack_rule mysql_php {
+  regex: "(mysqli|mysql\_.*|PDO::MYSQL|pdo::mysql|pdo.mysql|->mysql)"
+  category: "database"
+  subcategory: "mySQL"
+  description: "mysql expressions related to php"
+  file_scope {
+    filetypes: [".php"]
+  }
+}
+
+tech_stack_rule mysql_go {
+  regex: "^import\s+.*/mysql"
+  category: "database"
+  subcategory: "mySQL"
+  description: "mysql expressions related to golang"
+  file_scope {
+    filetypes: [".go"]
+  }
+}
+
+tech_stack_rule mysql_js {
+  regex: "^\s*require\(.mysql.+\);"
+  category: "database"
+  subcategory: "mySQL"
+  description: "mysql require statements in JS / TS"
+  file_scope {
+    filetypes: [".js", ".ts"]
+  }
+}
+
+tech_stack_rule mysql_java {
+  regex: "jdbc:mysql:"
+  category: "database"
+  subcategory: "mySQL"
+  description: "Java jdbc and misc mysql-related statements"
+  file_scope {
+    filetypes: [".java"]
+  }
+}
+
+tech_stack_rule ms_sql {
+  regex: "\b(?:mssql|sqlserver|ms_sql)\b"
+  category: "database"
+  subcategory: "microsoftSQLServer"
+  description: "MS SQL"
+  file_scope {
+    exclude: common_exclude_files
+  }
+}
+
+tech_stack_rule ms_access_java {
+  regex: "\b(jdbc:odbc:|ucanaccess|msaccess|jackcess)\b"
+  category: "database"
+  subcategory: "microsoftAccess"
+  description: "MS Access Generic"
+  file_scope {
+    filetypes: [".java"]
+  }
+}
+
+tech_stack_rule firebase_python {
+  regex: "^import\s+fdb\b"
+  category: "database"
+  subcategory: "firebird"
+  description: "Firebird python related packages"
+  file_scope {
+    filetypes: [".py"]
+  }
+}
+
+tech_stack_rule firebase_generic {
+  regex: "(using\s+FirebirdSql.Data.FirebirdClient|^include\s+.ibpp.h.|^require\(.node-firebird.\)|^require\s+.fb.\b)"
+  category: "database"
+  subcategory: "firebird"
+  description: "Firebird python related packages"
+  file_scope {
+    exclude: common_exclude_files
   }
 }

@@ -467,6 +467,8 @@ object tech_stack_rule {
   gen_typename:  "TechStackRule"
   gen_setters:   false
 
+  # FIXME how can we add a validation function that this is a valid
+  # PCRE expression?
   field regex {
     type:    string
     require: true
