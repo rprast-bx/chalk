@@ -11,16 +11,20 @@ import std/tables
 import std/hashes
 import ../config, ../plugin_api
 
+const FT_ANY = "*"
 # rule identifiers by filetype
+# FIXME change to hashset
+# https://nim-lang.org/docs/sets.html
 var ftRules = newTable[string, seq[string]]()
+var excludeFtRules = newTable[string, seq[string]]()
 # tech stack rules by each identifier
 var tsRules = newTable[string, TechStackRule]()
 # regex by name
 var regexes = newTable[string, Regex]()
-# category: [subcategory: name]
-var categories = newTable[string, TableRef[string, string]]()
-
-var detected = initTable[string, bool]()
+# category: [subcategory: seq[regex_name]]
+var categories = newTable[string, TableRef[string, seq[string]]]()
+# category: [subcategory: bool]
+var detected = newTable[string, TableRef[string, bool]]()
 
 const
     database = "database"
@@ -138,63 +142,104 @@ let names = ["firebird", "hypersonicSQL", "ibmDb2", "miscrosoftAccess",
 "sysbase"]
 
 # only parse top 20 lines for imports
-let head = 20
+# let head = 20
 
 
-proc scanFile(filePath: string, kind: string) =
+proc scanFile(filePath: string, category: string, subCategory: string) =
     var strm = newFileStream(filePath, fmRead)
     if isNil(strm):
         return
 
-    var line = ""
-    # FIXME initialize from dictionary
-    var foundKind = false
+    let splFile = splitFile(filePath)
+    let rule_names = categories[category][subCategory]
+    var applicable_rules: seq[string]
+    # applicable rules are eitehr rules that apply to all filetypes (FT_ANY)
+    # or to the filetype matching the given extension
+    for rule_name in categories[category][subCategory]:
+        let tsRule = tsRules[rule_name]
+        if contains(ftRules, FT_ANY) and contains(ftRules[FT_ANY], rule_name):
+            var exclude = false
+            if (tsRule.fileScope != nil and
+                tsRule.fileScope.getExclude().isSome()):
+                for ft in tsRule.fileScope.getExclude().get():
+                    # if the filetype does not match the current extension proceed
+                    if ft != splFile.ext and ft != "":
+                        continue
+                    # if we have a matching extension and a rule for that extenion,
+                    # append the rule in the rule to be run
+                    if contains(excludeFtRules, ft) and contains(excludeFtRules[ft], rule_name):
+                        exclude = true
+                        break
+            if not exclude:
+                applicable_rules.add(rule_name)
+            continue
 
+        if (tsRule.fileScope != nil and
+            tsRule.fileScope.getFileTypes().isSome()):
+            for ft in tsRule.fileScope.getFileTypes().get():
+                # if the filetype does not match the current extension proceed
+                if ft != splFile.ext and ft != "":
+                    continue
+                # if we have a matching extension and a rule for that extenion,
+                # append the rule in the rule to be run
+                if contains(ftRules, ft) and contains(ftRules[ft], rule_name):
+                    applicable_rules.add(rule_name)
+                    break
+
+    # if filePath == "/home/nettrino/projects/crashappsec/chalk/server/server/db/database.py":
+    #     trace("$$$\n$$$\n$$$\n")
+    #     trace($(applicable_rules))
+    var line = ""
     var i = 0
     while strm.readLine(line):
-        if i >= head:
-            break
         i += 1
-
-        if not detected[kind]:
-            if kind == "mySQL":
-                checkLine(foundKind, line, dbRegexDict[mySQL])
-            elif kind == "firebird":
-                checkLine(foundKind, line, @[RE_FIREBIRD_PYTHON, RE_FIREBIRD_GENERIC])
-            elif kind == "hypersonicSQL":
-                checkLine(foundKind, line, @[RE_HYPERSONIC_SQL])
-            elif kind == "ibmDb2":
-                checkLine(foundKind, line, @[RE_IBM_DB2, RE_IBM_DB2_JAVA])
-            elif kind == "miscrosoftAccess":
-                checkLine(foundKind, line, @[RE_MS_ACCESS_JAVA])
-            elif kind == "microsoftSQLServer":
-                checkLine(foundKind, line, @[RE_MS_SQL])
-            elif kind == "mongoDB":
-                checkLine(foundKind, line, @[RE_MONGODB])
-            elif kind == "oracle":
-                checkLine(foundKind, line, @[RE_ORACLE])
-
-            if foundKind:
-                detected[kind] = true
-                return
-
-        if foundKind:
+        if detected[category][subCategory]:
             break
+
+        for rule_name in applicable_rules:
+            let tsRule = tsRules[rule_name]
+            if (tsRule.fileScope != nil and
+                tsRule.fileScope.getHead().isSome() and
+                tsRule.fileScope.getHead().get() < i):
+                break
+
+            if find(line, regexes[rule_name]) != -1:
+                trace("Found match for regex " & rule_name & " in line " & $(line))
+                detected[category][subCategory] = true
+                break
+
+            # break
+            # if kind == "mySQL":
+            #     checkLine(foundKind, line, dbRegexDict[mySQL])
+            # elif kind == "firebird":
+            #     checkLine(foundKind, line, @[RE_FIREBIRD_PYTHON, RE_FIREBIRD_GENERIC])
+            # elif kind == "hypersonicSQL":
+            #     checkLine(foundKind, line, @[RE_HYPERSONIC_SQL])
+            # elif kind == "ibmDb2":
+            #     checkLine(foundKind, line, @[RE_IBM_DB2, RE_IBM_DB2_JAVA])
+            # elif kind == "miscrosoftAccess":
+            #     checkLine(foundKind, line, @[RE_MS_ACCESS_JAVA])
+            # elif kind == "microsoftSQLServer":
+            #     checkLine(foundKind, line, @[RE_MS_SQL])
+            # elif kind == "mongoDB":
+            #     checkLine(foundKind, line, @[RE_MONGODB])
+            # elif kind == "oracle":
+            #     checkLine(foundKind, line, @[RE_ORACLE])
 
     strm.close()
 
 # FIXME check that we don't fall into infinite loops with a symlink here
-proc scanDirectory(directory: string, kind: string) =
-    if detected[kind]:
+proc scanDirectory(directory: string, category: string, subCategory: string) =
+    if detected[category][subCategory]:
         return
     for filePath in walkDir(directory):
-        if detected[kind]:
+        if detected[category][subCategory]:
             break
         if filePath.kind == pcFile:
-            scanFile(filePath.path, kind)
+            scanFile(filePath.path, category, subCategory)
             continue
         if filePath.kind == pcDir:
-            scanDirectory(filePath.path, kind)
+            scanDirectory(filePath.path, category, subCategory)
             continue
 
 proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
@@ -203,25 +248,22 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
   result = ChalkDict()
 
   for category, subcategories in categories:
-    for subcategory, regex_name in subcategories:
-        echo category, "_", subcategory, "_", regex_name
-        detected[category & "_" & subcategory] = false
-
-  # for item in getContextDirectories():
-  #   for db in names:
-  #     trace("$\n## scanning for " & db)
-  #     let fpath = expandFilename(item)
-  #     if fpath.dirExists():
-  #       scanDirectory(fpath, db)
-  #       trace(" |- " & fpath & " " & $(detected[db]))
-  #     else:
-  #       let (head, _) = splitPath(fPath)
-  #       if head.dirExists():
-  #         scanDirectory(head, db)
-  #         trace(" |- " & head & " " & $(detected[db]))
-  # trace($(detected))
+    for subcategory, _ in subcategories:
+        # re-initialize to false again
+        # XXX check the diff between load time and invocation state
+        # does this need to be re-set upon every invocation here?
+        detected[category][subCategory] = false
+        for item in getContextDirectories():
+            let fpath = expandFilename(item)
+            if fpath.dirExists():
+                scanDirectory(fpath, category, subCategory)
+            else:
+                let (head, _) = splitPath(fPath)
+                if head.dirExists():
+                    scanDirectory(head, category, subCategory)
+                    trace(" |- " & head & " " & category & " " & subCategory & " " & $(detected[category][subCategory]))
   try:
-    result["_INFERRED_TECH_STACKS"] = pack[TableRef[string,TableRef[string,bool]]](cast[TableRef[string,TableRef[string,bool]]](techStackResult))
+    result["_INFERRED_TECH_STACKS"] = pack[TableRef[string,TableRef[string,bool]]](detected)
   except:
     echo getStackTrace()
     dumpExOnDebug()
@@ -231,26 +273,44 @@ proc loadtechStackGeneric*() =
   for key, val in chalkConfig.techStackRules:
     tsRules[key] = val
     regexes[key] = re(val.getRegex())
-    echo "rule name = ", key
     let category = val.getCategory()
+    let subCategory = val.getSubcategory()
     if contains(categories, category):
-        categories[category][val.getSubcategory()] = key
-    else:
-        categories[category] = newTable[string, string]()
-        categories[category][val.getSubcategory()] = key
-    if val.fileScope != nil:
-        if val.fileScope.getHead().isSome():
-            echo "head = ", val.fileScope.getHead().get()
-            let filetypes = val.fileScope.getFileTypes()
-            if filetypes.isSome():
-                for ft in filetypes.get():
-                    if contains(ftRules, ft):
-                        ftRules[ft].add(key)
-                    else:
-                        ftRules[ft] = @[key]
-    else:
-        if contains(ftRules, "all"):
-            ftRules["all"].add(key)
+        if contains(categories[category], subCategory):
+            categories[category][subCategory].add(key)
         else:
-            ftRules["all"] = @[key]
+            categories[category][subCategory] = @[key]
+    else:
+        categories[category] = newTable[string, seq[string]]()
+        categories[category][subCategory] = @[key]
+        detected[category] = newTable[string, bool]()
+        detected[category][subCategory] = false
+    if val.fileScope != nil:
+        let filetypes = val.fileScope.getFileTypes()
+        if filetypes.isSome():
+            for ft in filetypes.get():
+                if contains(ftRules, ft):
+                    ftRules[ft].add(key)
+                else:
+                    ftRules[ft] = @[key]
+        else:
+            # we only have exclude rules therefore we match by default
+            # XXX move to a tempalate for looking things up and adding if
+            # they don't exist
+            if contains(ftRules, FT_ANY):
+                ftRules[FT_ANY].add(key)
+            else:
+                ftRules[FT_ANY] = @[key]
+            let excludeFiletypes = val.fileScope.getExclude()
+            if excludeFiletypes.isSome():
+                for ft in excludeFiletypes.get():
+                    if contains(excludeFtRules, ft):
+                        excludeFtRules[ft].add(key)
+                    else:
+                        excludeFtRules[ft] = @[key]
+    else:
+        if contains(ftRules, FT_ANY):
+            ftRules[FT_ANY].add(key)
+        else:
+            ftRules[FT_ANY] = @[key]
   newPlugin("techStackGeneric", rtHostCallback = RunTimeHostCb(techStackGeneric))

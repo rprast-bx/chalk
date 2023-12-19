@@ -497,7 +497,8 @@ singleton file_scope {
   gen_typename:  "FileScope"
   gen_setters: false
 
-  # XXX exclude some filetypes
+  # FIXME make filetypes and exclude mutually exclusive.
+  # It does not make sense to have both as filetypes is a fixed list
   field filetypes {
     type:    list[string]
     require: false

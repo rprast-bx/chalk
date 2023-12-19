@@ -1,8 +1,11 @@
 tech_stack_rule sqlite_generic {
-  regex: "\bsqlite:\/\/\b"
+  regex: "sqlite:\/\/"
   category: "database"
   subcategory: "sqlite"
   description: "sqlite uris"
+  file_scope {
+    exclude: [".pyc", ".tmp", ".md", ".txt", ".html"]
+  }
 }
 
 import_limit := 20
@@ -11,9 +14,9 @@ tech_stack_rule mysql_python {
   regex: "^import\s+(mysql.connector|pymysql|MySQLdb)\b"
   category: "database"
   subcategory: "mySQL"
-  description: "import of common packages related to mysql"
+  description: "Import of common packages related to mysql in Python"
   file_scope {
-    filetypes: ["py"]
+    filetypes: [".py"]
     head: 20
   }
 }
