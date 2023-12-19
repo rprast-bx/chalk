@@ -453,13 +453,47 @@ failure, and no other keys will be checked.
   }
 }
 
-valid_tech_stack_categories := ["database", "webServer", "protocol"]
+linguist_types := ["programming", "data", "markup"]
+object linguist_language {
+  user_def_ok:   false
+  gen_fieldname: "linguist_languages"
+  gen_typename:  "LinguistLanguage"
+  gen_setters:   false
+
+  field type {
+    type:    string
+    require: true
+    choice: linguist_types
+  }
+
+  field extension {
+    type:    string
+    require: true
+  }
+
+  field altextensions {
+    type:    list[string]
+    require: false
+  }
+
+}
+
+
+valid_tech_stack_categories := ["database", "webServer", "protocol", "framework"]
 valid_tech_stack_database_types := ["firebird", "hypersonicSQL",
     "ibmDb2", "microsoftAccess", "microsoftSQLServer",
      "mongoDB", "mySQL", "oracle", "postgreSQL","sqlite", "sysbase", "other"]
 
 valid_tech_stack_web_server_types := ["apache", "nginx", "iis"]
 valid_tech_stack_protocol_types := ["ldap"]
+valid_tech_stack_framework_types := ["javaSpring"]
+
+# FIXME how can I constraint category w/ subcategory in the tech_stack_rule?
+# aka have a validator that is bound on the value of another field
+valid_subcategory_types := ["firebird", "hypersonicSQL",
+    "ibmDb2", "microsoftAccess", "microsoftSQLServer",
+     "mongoDB", "mySQL", "oracle", "postgreSQL","sqlite", "sysbase", "other",
+     "apache", "nginx", "iis", "ldap", "javaSpring"]
 
 object tech_stack_rule {
   user_def_ok:   false
@@ -488,7 +522,7 @@ object tech_stack_rule {
   field subcategory {
     type: string
     require: true
-    choice: valid_tech_stack_database_types
+    choice: valid_subcategory_types
   }
   allow file_scope
 }

@@ -1,4 +1,4 @@
-common_exclude_files := [".pyc", ".conf", ".yml", ".yaml", ".json", ".tmp", ".md", ".txt", ".html", ".c4m", ".lock"]
+common_exclude_files := [".pyc", ".yml", ".yaml", ".json", ".tmp", ".md", ".txt", ".c4m", ".lock"]
 head_limit := 50
 hard_limit := 500
 
@@ -186,6 +186,7 @@ tech_stack_rule ibmdb2_java {
   }
 }
 
+
 tech_stack_rule nginx_conf {
   regex: "^\s*(server_name|listen|location|proxy_pass|root|try_files)\s"
   category: "webServer"
@@ -203,5 +204,32 @@ tech_stack_rule apache_conf {
   description: "common directives in apache configurations"
   file_scope {
     filetypes: [".conf"]
+  }
+}
+
+tech_stack_rule iis_conf {
+  regex: "<configuration|<system.webServer|<iis"
+  category: "webServer"
+  subcategory: "iis"
+  description: "common directives in IIS configurations"
+  file_scope {
+    filetypes: [".xml", ".config"]
+  }
+}
+
+tech_stack_rule ldap_generic {
+  regex: "ldap:\/\/"
+  category: "protocol"
+  subcategory: "ldap"
+  description: "use of ldap uris"
+}
+
+tech_stack_rule java_spring_generic {
+  regex: "(?:@Component|@Repository|@Service|@Controller|@Configuration|@Autowired|@Qualifier|@Value|@RequestMapping|@PathVariable|@RequestParam|@ResponseBody|@ResponseStatus|@ExceptionHandler|@Transactional|@PostConstruct|@PreDestroy)\b"
+  category: "framework"
+  subcategory: "javaSpring"
+  description: "common directives in the Java Spring framework"
+  file_scope {
+    filetypes: [".java"]
   }
 }

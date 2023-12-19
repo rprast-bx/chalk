@@ -78,7 +78,7 @@ proc doCommandReport(): string {.inline.} =
     # The above goes from the string name to the object.
 
   if chalkConfig.getSkipCommandReport():
-    info("Skipping the command report, because you said so.")
+    info("Skipping the command report as per the `skip_command_report` directive")
     result = ""
   else:
     if len(unmarked) != 0:

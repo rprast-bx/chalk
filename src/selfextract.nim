@@ -225,6 +225,7 @@ proc testConfigFile*(uri: string, newCon4m: string, params: seq[Box]):
                addConfLoad(attestConfName, toStream(attestConfig)).
                addConfLoad(sbomConfName, toStream(sbomConfig)).
                addConfLoad(sastConfName, toStream(sastConfig)).
+               addConfLoad(linguistConfName, toStream(linguistConfig)).
                addConfLoad(techStackConfName, toStream(techStackConfig))
 
   # TODO for Theo: load the internal config file for rules
@@ -265,8 +266,10 @@ proc paramsToBox(a: bool, b, c: string, d: Con4mType, e: Box): Box =
   var arr = @[ pack(a), pack(b), pack(c), pack($(d)), e ]
   return pack(arr)
 
+# FIXME (theo) what should be added here?
 const nocache = ["configs/ioconfig.c4m", "configs/sastconfig.c4m",
                 "configs/techstackconfig.c4m",
+                "configs/linguist.c4m",
                  "[embedded config]", "configs/base_*.c4m",
                  "configs/sbomconfig.c4m", "configs/attestation.c4m",
                  "configs/getopts.c4m"]
