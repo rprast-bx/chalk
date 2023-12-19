@@ -527,6 +527,8 @@ object tech_stack_rule {
   allow file_scope
 }
 
+scope_head_max := 200
+
 singleton file_scope {
   user_def_ok: false
   gen_fieldname: "fileScope"
@@ -545,9 +547,10 @@ singleton file_scope {
     require: false
   }
 
+  # FIXME how can I have a warning on those if set to a large value?
   field head {
     type:    int
-    require: false
+    default: scope_head_max
   }
 }
 

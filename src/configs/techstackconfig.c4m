@@ -1,6 +1,5 @@
 common_exclude_files := [".pyc", ".yml", ".yaml", ".json", ".tmp", ".md", ".txt", ".c4m", ".lock"]
 head_limit := 50
-hard_limit := 200
 
 tech_stack_rule sqlite_generic {
   regex: "sqlite:\/\/"
@@ -9,7 +8,6 @@ tech_stack_rule sqlite_generic {
   description: "sqlite uris"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -20,7 +18,6 @@ tech_stack_rule postgresql_generic {
   description: "postgresSQL common regex"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -31,7 +28,6 @@ tech_stack_rule oracle_generic {
   description: "oracle common regex"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -42,7 +38,6 @@ tech_stack_rule mongodb_generic {
   description: "mongoDB common regex"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -64,7 +59,6 @@ tech_stack_rule mysql_generic {
   description: "generic mysql uri"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -117,7 +111,6 @@ tech_stack_rule ms_sql {
   description: "MS SQL"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -149,7 +142,6 @@ tech_stack_rule firebase_generic {
   description: "Firebird python related packages"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -160,7 +152,6 @@ tech_stack_rule hypersonicsql_generic {
   description: "HSQLDB related"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -171,7 +162,6 @@ tech_stack_rule ibmdb2_generic {
   description: "IBM DB2 related"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 
@@ -224,7 +214,6 @@ tech_stack_rule ldap_generic {
   description: "use of ldap uris"
   file_scope {
     exclude: common_exclude_files
-    head: hard_limit
   }
 }
 

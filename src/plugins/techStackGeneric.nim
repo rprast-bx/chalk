@@ -11,6 +11,7 @@ import std/tables
 import std/hashes
 import std/sets
 import std/sequtils
+import system
 import ../config, ../plugin_api
 
 const FT_ANY = "*"
@@ -27,6 +28,11 @@ var regexes = newTable[string, Regex]()
 var categories = newTable[string, TableRef[string, seq[string]]]()
 # category: [subcategory: bool]
 var detected = newTable[string, TableRef[string, bool]]()
+# limits for what portion from the start of the file a rule must read into
+var headLimits = newTable[string, int]()
+
+var ruleFiletypes = newTable[string, seq[string]]()
+var ruleExcludeFiletypes = newTable[string, seq[string]]()
 
 proc scanFile(filePath: string, category: string, subCategory: string) =
     var strm = newFileStream(filePath, fmRead)
@@ -42,9 +48,8 @@ proc scanFile(filePath: string, category: string, subCategory: string) =
         let tsRule = tsRules[rule_name]
         if contains(ftRules, FT_ANY) and contains(ftRules[FT_ANY], rule_name):
             var exclude = false
-            if (tsRule.fileScope != nil and
-                tsRule.fileScope.getExclude().isSome()):
-                for ft in tsRule.fileScope.getExclude().get():
+            if contains(ruleExcludeFiletypes, rule_name):
+                for ft in ruleExcludeFiletypes[rule_name]:
                     # if the filetype does not match the current extension proceed
                     if ft != splFile.ext and ft != "":
                         continue
@@ -57,9 +62,8 @@ proc scanFile(filePath: string, category: string, subCategory: string) =
                 applicable_rules.add(rule_name)
             continue
 
-        if (tsRule.fileScope != nil and
-            tsRule.fileScope.getFileTypes().isSome()):
-            for ft in tsRule.fileScope.getFileTypes().get():
+        if contains(ruleFiletypes, rule_name):
+            for ft in ruleFiletypes[rule_name]:
                 # if the filetype does not match the current extension proceed
                 if ft != splFile.ext and ft != "":
                     continue
@@ -77,10 +81,7 @@ proc scanFile(filePath: string, category: string, subCategory: string) =
             break
 
         for rule_name in applicable_rules:
-            let tsRule = tsRules[rule_name]
-            if (tsRule.fileScope != nil and
-                tsRule.fileScope.getHead().isSome() and
-                tsRule.fileScope.getHead().get() < i):
+            if headLimits[rule_name] < i:
                 break
 
             if find(line, regexes[rule_name]) != -1:
@@ -174,8 +175,6 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
 
 proc loadtechStackGeneric*() =
   for langName, val in chalkConfig.linguistLanguages:
-    if val.getType() != "programming":
-        continue
     languages[val.getExtension()] = langName
 
   for key, val in chalkConfig.techStackRules:
@@ -194,9 +193,12 @@ proc loadtechStackGeneric*() =
         detected[category] = newTable[string, bool]()
         detected[category][subCategory] = false
     if val.fileScope != nil:
+        headLimits[key] = val.fileScope.getHead()
         let filetypes = val.fileScope.getFileTypes()
         if filetypes.isSome():
-            for ft in filetypes.get():
+            let ftypes = filetypes.get()
+            ruleFiletypes[key] = ftypes
+            for ft in ftypes:
                 if contains(ftRules, ft):
                     ftRules[ft].incl(key)
                 else:
@@ -211,12 +213,16 @@ proc loadtechStackGeneric*() =
                 ftRules[FT_ANY] = toHashSet([key])
             let excludeFiletypes = val.fileScope.getExclude()
             if excludeFiletypes.isSome():
-                for ft in excludeFiletypes.get():
+                let exclFtps = excludeFiletypes.get()
+                ruleExcludeFiletypes[key] = exclFtps
+                for ft in exclFtps:
                     if contains(excludeFtRules, ft):
                         excludeFtRules[ft].incl(key)
                     else:
                         excludeFtRules[ft] = toHashSet([key])
     else:
+        # FIXME can I get the default somehow?
+        headLimits[key] = 200
         if contains(ftRules, FT_ANY):
             ftRules[FT_ANY].incl(key)
         else:
