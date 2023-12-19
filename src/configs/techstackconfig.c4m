@@ -1,5 +1,6 @@
-common_exclude_files := [".pyc", ".tmp", ".md", ".txt", ".html", ".c4m", ".lock"]
-head_limit := 25
+common_exclude_files := [".pyc", ".conf", ".yml", ".yaml", ".json", ".tmp", ".md", ".txt", ".html", ".c4m", ".lock"]
+head_limit := 50
+hard_limit := 500
 
 tech_stack_rule sqlite_generic {
   regex: "sqlite:\/\/"
@@ -8,6 +9,7 @@ tech_stack_rule sqlite_generic {
   description: "sqlite uris"
   file_scope {
     exclude: common_exclude_files
+    head: hard_limit
   }
 }
 
@@ -18,16 +20,18 @@ tech_stack_rule postgresql_generic {
   description: "postgresSQL common regex"
   file_scope {
     exclude: common_exclude_files
+    head: hard_limit
   }
 }
 
 tech_stack_rule oracle_generic {
-  regex: "\b(oracledb|oraclient|oradatabase)\b"
+  regex: "(oracledb|oraclient|oradatabase)"
   category: "database"
   subcategory: "oracle"
   description: "oracle common regex"
   file_scope {
     exclude: common_exclude_files
+    head: hard_limit
   }
 }
 
@@ -38,6 +42,7 @@ tech_stack_rule mongodb_generic {
   description: "mongoDB common regex"
   file_scope {
     exclude: common_exclude_files
+    head: hard_limit
   }
 }
 
@@ -59,6 +64,7 @@ tech_stack_rule mysql_generic {
   description: "generic mysql uri"
   file_scope {
     exclude: common_exclude_files
+    head: hard_limit
   }
 }
 
@@ -79,6 +85,7 @@ tech_stack_rule mysql_go {
   description: "mysql expressions related to golang"
   file_scope {
     filetypes: [".go"]
+    head: head_limit
   }
 }
 
@@ -89,6 +96,7 @@ tech_stack_rule mysql_js {
   description: "mysql require statements in JS / TS"
   file_scope {
     filetypes: [".js", ".ts"]
+    head: head_limit
   }
 }
 
@@ -109,6 +117,7 @@ tech_stack_rule ms_sql {
   description: "MS SQL"
   file_scope {
     exclude: common_exclude_files
+    head: hard_limit
   }
 }
 
@@ -129,6 +138,7 @@ tech_stack_rule firebase_python {
   description: "Firebird python related packages"
   file_scope {
     filetypes: [".py"]
+    head: head_limit
   }
 }
 
@@ -139,5 +149,59 @@ tech_stack_rule firebase_generic {
   description: "Firebird python related packages"
   file_scope {
     exclude: common_exclude_files
+    head: hard_limit
+  }
+}
+
+tech_stack_rule hypersonicsql_generic {
+  regex: "\b(hsqldb|HyperSQL|.*org.hsqldb.jdbc.*)\b"
+  category: "database"
+  subcategory: "hypersonicSQL"
+  description: "HSQLDB related"
+  file_scope {
+    exclude: common_exclude_files
+    head: hard_limit
+  }
+}
+
+tech_stack_rule ibmdb2_generic {
+  regex: "(db2jcc|com\.ibm\.db2\.jdbc|ibm_db|ibm_db_dbi)"
+  category: "database"
+  subcategory: "ibmDb2"
+  description: "IBM DB2 related"
+  file_scope {
+    exclude: common_exclude_files
+    head: hard_limit
+  }
+}
+
+tech_stack_rule ibmdb2_java {
+  regex: "import\s+com.ibm.db2.jcc.DB2Driver"
+  category: "database"
+  subcategory: "ibmDb2"
+  description: "IBM DB2 related"
+  file_scope {
+    filetypes: [".java"]
+    head: head_limit
+  }
+}
+
+tech_stack_rule nginx_conf {
+  regex: "^\s*(server_name|listen|location|proxy_pass|root|try_files)\s"
+  category: "webServer"
+  subcategory: "nginx"
+  description: "common directives in nginx configurations"
+  file_scope {
+    filetypes: [".conf"]
+  }
+}
+
+tech_stack_rule apache_conf {
+  regex: "^\s*(DocumentRoot|ServerName|ProxyPass|RewriteEngine|DirectoryIndex)\s"
+  category: "webServer"
+  subcategory: "apache"
+  description: "common directives in apache configurations"
+  file_scope {
+    filetypes: [".conf"]
   }
 }

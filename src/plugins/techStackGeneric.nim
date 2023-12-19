@@ -9,14 +9,14 @@
 import std/re
 import std/tables
 import std/hashes
+import std/sets
 import ../config, ../plugin_api
 
 const FT_ANY = "*"
 # rule identifiers by filetype
-# FIXME change to hashset
-# https://nim-lang.org/docs/sets.html
-var ftRules = newTable[string, seq[string]]()
-var excludeFtRules = newTable[string, seq[string]]()
+var ftRules = newTable[string, HashSet[string]]()
+# rules to be excluded from given filetypes
+var excludeFtRules = newTable[string, HashSet[string]]()
 # tech stack rules by each identifier
 var tsRules = newTable[string, TechStackRule]()
 # regex by name
@@ -25,17 +25,6 @@ var regexes = newTable[string, Regex]()
 var categories = newTable[string, TableRef[string, seq[string]]]()
 # category: [subcategory: bool]
 var detected = newTable[string, TableRef[string, bool]]()
-
-#
-# Hypersonic SQL
-#
-let RE_HYPERSONIC_SQL* = re"(hsqldb|HyperSQL|org.hsqldb.jdbc)"
-
-#
-# IBM DB2
-#
-let RE_IBM_DB2* = re"\b(db2jcc|com\.ibm\.db2\.jdbc|(ibm_db|ibm_db_dbi))\b"
-let RE_IBM_DB2_JAVA* = re"import\s+com.ibm.db2.jcc.DB2Driver"
 
 proc scanFile(filePath: string, category: string, subCategory: string) =
     var strm = newFileStream(filePath, fmRead)
@@ -78,9 +67,6 @@ proc scanFile(filePath: string, category: string, subCategory: string) =
                     applicable_rules.add(rule_name)
                     break
 
-    # if filePath == "/home/nettrino/projects/crashappsec/chalk/server/server/db/database.py":
-    #     trace("$$$\n$$$\n$$$\n")
-    #     trace($(applicable_rules))
     var line = ""
     var i = 0
     while strm.readLine(line):
@@ -120,6 +106,8 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
 
   result = ChalkDict()
 
+  trace("Runtime detection of tech stacks")
+  var hasResults = false
   for category, subcategories in categories:
     for subcategory, _ in subcategories:
         # re-initialize to false again
@@ -127,19 +115,32 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
         # does this need to be re-set upon every invocation here?
         detected[category][subCategory] = false
         for item in getContextDirectories():
+            if detected[category][subCategory]:
+                break
             let fpath = expandFilename(item)
             if fpath.dirExists():
                 scanDirectory(fpath, category, subCategory)
             else:
                 let (head, _) = splitPath(fPath)
                 if head.dirExists():
-                    scanDirectory(head, category, subCategory)
-  try:
-    result["_INFERRED_TECH_STACKS"] = pack[TableRef[string,TableRef[string,bool]]](detected)
-  except:
-    echo getStackTrace()
-    dumpExOnDebug()
-    trace("Testing packing")
+                  scanDirectory(head, category, subCategory)
+        if detected[category][subCategory]:
+            hasResults = true
+
+  if not hasResults:
+    return
+
+  # get the final results out
+  var final = newTable[string, seq[string]]()
+  for category, subcategories in categories:
+      for subCategory, _ in subcategories:
+          if not detected[category][subCategory]:
+              continue
+          if contains(final, category):
+            final[category].add(subCategory)
+          else:
+            final[category] = @[subCategory]
+  result["_INFERRED_TECH_STACKS"] = pack[TableRef[string, seq[string]]](final)
 
 proc loadtechStackGeneric*() =
   for key, val in chalkConfig.techStackRules:
@@ -162,27 +163,27 @@ proc loadtechStackGeneric*() =
         if filetypes.isSome():
             for ft in filetypes.get():
                 if contains(ftRules, ft):
-                    ftRules[ft].add(key)
+                    ftRules[ft].incl(key)
                 else:
-                    ftRules[ft] = @[key]
+                    ftRules[ft] = toHashSet([key])
         else:
             # we only have exclude rules therefore we match by default
             # XXX move to a tempalate for looking things up and adding if
             # they don't exist
             if contains(ftRules, FT_ANY):
-                ftRules[FT_ANY].add(key)
+                ftRules[FT_ANY].incl(key)
             else:
-                ftRules[FT_ANY] = @[key]
+                ftRules[FT_ANY] = toHashSet([key])
             let excludeFiletypes = val.fileScope.getExclude()
             if excludeFiletypes.isSome():
                 for ft in excludeFiletypes.get():
                     if contains(excludeFtRules, ft):
-                        excludeFtRules[ft].add(key)
+                        excludeFtRules[ft].incl(key)
                     else:
-                        excludeFtRules[ft] = @[key]
+                        excludeFtRules[ft] = toHashSet([key])
     else:
         if contains(ftRules, FT_ANY):
-            ftRules[FT_ANY].add(key)
+            ftRules[FT_ANY].incl(key)
         else:
-            ftRules[FT_ANY] = @[key]
+            ftRules[FT_ANY] = toHashSet([key])
   newPlugin("techStackGeneric", rtHostCallback = RunTimeHostCb(techStackGeneric))
