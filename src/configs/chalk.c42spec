@@ -2170,6 +2170,7 @@ root {
   allow source_marks
   allow cloud_provider
   allow tech_stack_rule
+  allow linguist_language
 
   shortdoc: "Chalk Configuration Options"
 

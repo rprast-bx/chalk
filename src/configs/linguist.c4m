@@ -97,24 +97,24 @@ linguist_language C {
   altextensions: [".w"]
 }
 
-linguist_language C# {
+linguist_language CSharp {
   type: "programming"
   extension: ".cs"
   altextensions: [".csx"]
 }
 
-linguist_language C++ {
+linguist_language Cpp {
   type: "programming"
   extension: ".cpp"
   altextensions: [".C", ".c++", ".cxx", ".H", ".h++", ".hh", ".hxx", ".tcc"]
 }
 
-linguist_language C-ObjDump {
+linguist_language CObjDump {
   type: "data"
   extension: ".c-objdump"
 }
 
-linguist_language C2hs Haskell {
+linguist_language C2hsHaskell {
   type: "programming"
   extension: ".chs"
 }
@@ -153,10 +153,16 @@ linguist_language ColdFusion {
   altextensions: [".cfc"]
 }
 
-linguist_language Common Lisp {
+linguist_language CommonLisp {
   type: "programming"
   extension: ".lisp"
   altextensions: [".asd", ".lsp", ".ny", ".podsl"]
+}
+
+linguist_language Con4m {
+  type: "programming"
+  extension: ".c4m"
+  altextensions: [".c42spec", ".con4m"]
 }
 
 linguist_language Coq {
@@ -164,7 +170,7 @@ linguist_language Coq {
   extension: ".coq"
 }
 
-linguist_language Cpp-ObjDump {
+linguist_language CppObjDump {
   type: "data"
   extension: ".cppobjdump"
   altextensions: [".c++objdump", ".cxx-objdump"]
@@ -187,7 +193,7 @@ linguist_language D {
   altextensions: [".di"]
 }
 
-linguist_language D-ObjDump {
+linguist_language DObjDump {
   type: "data"
   extension: ".d-objdump"
 }
@@ -203,7 +209,7 @@ linguist_language Dart {
   extension: ".dart"
 }
 
-linguist_language DCPU-16 ASM {
+linguist_language DCPU16ASM {
   type: "programming"
   extension: ".dasm16"
   altextensions: [".dasm"]
@@ -214,7 +220,7 @@ linguist_language Dylan {
   extension: ".dylan"
 }
 
-linguist_language Ecere Projects {
+linguist_language EcereProjects {
   type: "data"
   extension: ".epj"
 }
@@ -241,7 +247,7 @@ linguist_language Elm {
   extension: ".elm"
 }
 
-linguist_language Emacs Lisp {
+linguist_language EmacsLisp {
   type: "programming"
   extension: ".el"
   altextensions: [".emacs"]
@@ -253,7 +259,7 @@ linguist_language Erlang {
   altextensions: [".hrl"]
 }
 
-linguist_language F# {
+linguist_language FSharp {
   type: "programming"
   extension: ".fs"
   altextensions: [".fsi", ".fsx"]
@@ -320,19 +326,19 @@ linguist_language HTML {
   altextensions: [".htm", ".xhtml"]
 }
 
-linguist_language HTML+Django {
+linguist_language HTMLDjango {
   type: "markup"
   extension: ".mustache"
   altextensions: [".jinja", ".mustache"]
 }
 
-linguist_language HTML+ERB {
+linguist_language HTMLERB {
   type: "markup"
   extension: ".erb"
   altextensions: [".erb.deface", ".html.erb", ".html.erb.deface"]
 }
 
-linguist_language HTML+PHP {
+linguist_language HTMLPHP {
   type: "markup"
   extension: ".phtml"
 }
@@ -428,12 +434,12 @@ linguist_language Less {
   extension: ".less"
 }
 
-linguist_language Literate CoffeeScript {
+linguist_language LiterateCoffeeScript {
   type: "programming"
   extension: ".litcoffee"
 }
 
-linguist_language Literate Haskell {
+linguist_language LiterateHaskell {
   type: "programming"
   extension: ".lhs"
 }
@@ -538,13 +544,13 @@ linguist_language ObjDump {
   extension: ".objdump"
 }
 
-linguist_language Objective-C {
+linguist_language ObjectiveC {
   type: "programming"
   extension: ".m"
   altextensions: [".mm"]
 }
 
-linguist_language Objective-J {
+linguist_language ObjectiveJ {
   type: "programming"
   extension: ".j"
   altextensions: [".sj"]
@@ -566,7 +572,7 @@ linguist_language OpenCL {
   altextensions: [".opencl"]
 }
 
-linguist_language OpenEdge ABL {
+linguist_language OpenEdgeABL {
   type: "programming"
   extension: ".p"
 }
@@ -587,12 +593,12 @@ linguist_language Parrot {
   extension: ".parrot"
 }
 
-linguist_language Parrot Internal Representation {
+linguist_language ParrotInternalRepresentation {
   type: "programming"
   extension: ".pir"
 }
 
-linguist_language Parrot Assembly {
+linguist_language ParrotAssembly {
   type: "programming"
   extension: ".pasm"
 }
@@ -642,7 +648,7 @@ linguist_language Puppet {
   altextensions: [".pp"]
 }
 
-linguist_language Pure Data {
+linguist_language PureData {
   type: "programming"
   extension: ".pd"
 }
@@ -653,7 +659,7 @@ linguist_language Python {
   altextensions: [".gyp", ".pyt", ".pyw", ".wsgi", ".xpy"]
 }
 
-linguist_language Python traceback {
+linguist_language Pythontraceback {
   type: "data"
   extension: ".pytb"
 }
@@ -679,7 +685,7 @@ linguist_language Racket {
   altextensions: [".rktd", ".rktl"]
 }
 
-linguist_language Ragel in Ruby Host {
+linguist_language RagelinRubyHost {
   type: "programming"
   extension: ".rl"
 }
@@ -768,7 +774,7 @@ linguist_language Squirrel {
   extension: ".nut"
 }
 
-linguist_language Standard ML {
+linguist_language StandardML {
   type: "programming"
   extension: ".sml"
 }
@@ -831,7 +837,7 @@ linguist_language TypeScript {
   extension: ".ts"
 }
 
-linguist_language Unified Parallel C {
+linguist_language UnifiedParallelC {
   type: "programming"
   extension: ".upc"
 }
@@ -858,7 +864,7 @@ linguist_language VimL {
   extension: ".vim"
 }
 
-linguist_language Visual Basic {
+linguist_language VisualBasic {
   type: "programming"
   extension: ".vb"
   altextensions: [".bas", ".frx", ".vba", ".vbs"]
