@@ -1,6 +1,6 @@
 common_exclude_files := [".pyc", ".yml", ".yaml", ".json", ".tmp", ".md", ".txt", ".c4m", ".lock"]
 head_limit := 50
-hard_limit := 500
+hard_limit := 200
 
 tech_stack_rule sqlite_generic {
   regex: "sqlite:\/\/"
@@ -222,6 +222,10 @@ tech_stack_rule ldap_generic {
   category: "protocol"
   subcategory: "ldap"
   description: "use of ldap uris"
+  file_scope {
+    exclude: common_exclude_files
+    head: hard_limit
+  }
 }
 
 tech_stack_rule java_spring_generic {

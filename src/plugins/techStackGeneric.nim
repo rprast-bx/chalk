@@ -10,9 +10,11 @@ import std/re
 import std/tables
 import std/hashes
 import std/sets
+import std/sequtils
 import ../config, ../plugin_api
 
 const FT_ANY = "*"
+var languages = newTable[string, string]()
 # rule identifiers by filetype
 var ftRules = newTable[string, HashSet[string]]()
 # rules to be excluded from given filetypes
@@ -82,7 +84,7 @@ proc scanFile(filePath: string, category: string, subCategory: string) =
                 break
 
             if find(line, regexes[rule_name]) != -1:
-                trace(filePath & ": found match for regex " & rule_name & " in line \n" & $(line))
+                # trace(filePath & ": found match for regex " & rule_name & " in line \n" & $(line))
                 detected[category][subCategory] = true
                 break
     strm.close()
@@ -101,12 +103,44 @@ proc scanDirectory(directory: string, category: string, subCategory: string) =
             scanDirectory(filePath.path, category, subCategory)
             continue
 
+proc getLanguages(directory: string, langs: var HashSet[string]) =
+    for filePath in walkDir(directory):
+        if filePath.kind == pcFile:
+            let splFile = splitFile(filePath.path)
+            if splFile.ext == "":
+                continue
+            if not contains(languages, splFile.ext):
+                continue
+            langs.incl(languages[splFile.ext])
+            continue
+        if filePath.kind == pcDir:
+            getLanguages(filePath.path, langs)
+            continue
+
 proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
     ChalkDict {.cdecl.} =
 
   result = ChalkDict()
+  var final = newTable[string, seq[string]]()
 
   trace("Runtime detection of tech stacks")
+
+  # FIXME break up into two functions
+  trace("Detecting languages")
+  var langs: HashSet[string]
+  for item in getContextDirectories():
+      let fpath = expandFilename(item)
+      if fpath.dirExists():
+          getLanguages(fpath, langs)
+      else:
+          let (head, _) = splitPath(fPath)
+          if head.dirExists():
+              getLanguages(head, langs)
+  if len(langs) > 0:
+    final["language"] = toSeq(langs)
+
+
+  trace("Running scans of tech stack rules")
   var hasResults = false
   for category, subcategories in categories:
     for subcategory, _ in subcategories:
@@ -127,22 +161,23 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
         if detected[category][subCategory]:
             hasResults = true
 
-  if not hasResults:
-    return
-
-  # get the final results out
-  var final = newTable[string, seq[string]]()
-  for category, subcategories in categories:
-      for subCategory, _ in subcategories:
-          if not detected[category][subCategory]:
-              continue
-          if contains(final, category):
-            final[category].add(subCategory)
-          else:
-            final[category] = @[subCategory]
+  if hasResults:
+    for category, subcategories in categories:
+        for subCategory, _ in subcategories:
+            if not detected[category][subCategory]:
+                continue
+            if contains(final, category):
+                final[category].add(subCategory)
+            else:
+                final[category] = @[subCategory]
   result["_INFERRED_TECH_STACKS"] = pack[TableRef[string, seq[string]]](final)
 
 proc loadtechStackGeneric*() =
+  for langName, val in chalkConfig.linguistLanguages:
+    if val.getType() != "programming":
+        continue
+    languages[val.getExtension()] = langName
+
   for key, val in chalkConfig.techStackRules:
     tsRules[key] = val
     regexes[key] = re(val.getRegex())

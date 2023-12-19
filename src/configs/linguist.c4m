@@ -522,7 +522,7 @@ linguist_language Nginx {
   extension: ".nginxconf"
 }
 
-linguist_language Nimrod {
+linguist_language Nim {
   type: "programming"
   extension: ".nim"
   altextensions: [".nimrod"]
