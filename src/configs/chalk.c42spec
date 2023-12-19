@@ -527,7 +527,7 @@ object tech_stack_rule {
   allow file_scope
 }
 
-scope_head_max := 200
+scope_head_max := 500
 
 singleton file_scope {
   user_def_ok: false

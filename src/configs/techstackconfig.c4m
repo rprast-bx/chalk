@@ -12,12 +12,22 @@ tech_stack_rule sqlite_generic {
 }
 
 tech_stack_rule postgresql_generic {
-  regex: "\b(postgresql|pgclient|pgdatabase)\b"
+  regex: "\b(postgresql|pgclient|pgsql|pgdatabase)\b"
   category: "database"
   subcategory: "postgreSQL"
   description: "postgresSQL common regex"
   file_scope {
     exclude: common_exclude_files
+  }
+}
+
+tech_stack_rule postgresql_php {
+  regex: "(->.*(postgres|pgsql)|(pgsql|postgres).*->)"
+  category: "database"
+  subcategory: "postgreSQL"
+  description: "postgresql expressions used in php"
+  file_scope {
+    filetypes: [".php"]
   }
 }
 
@@ -198,7 +208,7 @@ tech_stack_rule apache_conf {
 }
 
 tech_stack_rule iis_conf {
-  regex: "<configuration|<system.webServer|<iis"
+  regex: "<system.webServer|<iis"
   category: "webServer"
   subcategory: "iis"
   description: "common directives in IIS configurations"

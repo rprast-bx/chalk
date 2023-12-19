@@ -75,17 +75,19 @@ proc scanFile(filePath: string, category: string, subCategory: string) =
 
     var line = ""
     var i = 0
+    var abort = false
     while strm.readLine(line):
         i += 1
-        if detected[category][subCategory]:
+        if detected[category][subCategory] or abort:
             break
 
         for rule_name in applicable_rules:
-            if headLimits[rule_name] < i:
+            if i >= headLimits[rule_name]:
+                abort = true
                 break
 
             if find(line, regexes[rule_name]) != -1:
-                # trace(filePath & ": found match for regex " & rule_name & " in line \n" & $(line))
+                trace(filePath & ": found match for regex " & rule_name & " in line \n" & $(line))
                 detected[category][subCategory] = true
                 break
     strm.close()
@@ -221,8 +223,8 @@ proc loadtechStackGeneric*() =
                     else:
                         excludeFtRules[ft] = toHashSet([key])
     else:
-        # FIXME can I get the default somehow?
-        headLimits[key] = 200
+        # FIXME can I get the default from a constant?
+        headLimits[key] = 500
         if contains(ftRules, FT_ANY):
             ftRules[FT_ANY].incl(key)
         else:
