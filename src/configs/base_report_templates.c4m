@@ -1509,6 +1509,8 @@ and keep the run-time key.
   key._IMAGE_VIRTUAL_SIZE.use                 = true
   key._IMAGE_LAST_TAG_TIME.use                = true
   key._IMAGE_STORAGE_METADATA.use             = true
+  key._INFERRED_TECH_STACKS.use               = true
+  key._INFERRED_TECH_STACKS_HOST.use          = true
   key._INSTANCE_CONTAINER_ID.use              = true
   key._INSTANCE_CREATION_DATETIME.use         = true
   key._INSTANCE_ENTRYPOINT_PATH.use           = true
@@ -1765,6 +1767,7 @@ running insert commands.
   key.DOCKER_PLATFORM.use                     = true
   key.DOCKER_LABELS.use                       = true
   key.DOCKER_TAGS.use                         = true
+  key._INFERRED_TECH_STACKS.use               = true
   key.METADATA_ID.use                         = true
   key.SIGNATURE.use                           = true
   key._SIGNATURE.use                          = true

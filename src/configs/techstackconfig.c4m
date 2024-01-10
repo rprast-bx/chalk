@@ -204,7 +204,7 @@ tech_stack_rule nginx_host {
   description: "nginx config path"
   rule_scope: "HOST"
   file_scope {
-    filepaths: ["/etc/nginx/nginx.conf"]
+    filepaths: ["/etc/nginx/nginx.conf", "/tmp/foo"]
   }
 }
 

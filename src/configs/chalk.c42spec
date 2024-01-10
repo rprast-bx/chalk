@@ -3076,28 +3076,28 @@ To skip the pager on the command line, use the `--no-pager` flag.
 """
  }
 
-  field crashoverride_usage_reporting_url {
+ field crashoverride_usage_reporting_url {
     type:       string
     default:    "https://chalk.crashoverride.run/v0.1/usage"
     hidden:     true
     doc:        "Used to approximate overall chalk usage. See the usage report"
   }
 
-  field crashoverride_workspace_id {
+ field crashoverride_workspace_id {
     type:       string
     default:    "470f1ff7-8b26-43a5-a31d-45c2fcecfaa2"
     hidden:     true
     doc:        "The default value is the one used for anonymous users."
   }
 
-  field use_tech_stack_detection {
+ field use_tech_stack_detection {
     type:    bool
-    default: false
+    default: true
     shortdoc: "Try to infer tech stacks used"
     doc: """
-Enable experimental tech stack detection via regexes
-"""
-}
+  Enable experimental tech stack detection via regexes
+  """
+ }
 }
 
 func keyspec_exists(name) {

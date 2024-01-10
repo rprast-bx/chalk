@@ -193,7 +193,7 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
     final["language"] = toSeq(langs)
 
   trace("Running scans of tech stack rules")
-  var hasResults = false
+  var hasResults = len(langs) > 0
   var hasResultsHost = false
   for category, subcategories in categories:
     for subcategory, _ in subcategories:
@@ -225,15 +225,16 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
                 else:
                     final[category] = @[subCategory]
             if detectedHost[category][subCategory]:
-                if contains(final, category):
+                if contains(final_host, category):
                     final_host[category].add(subCategory)
                 else:
                     final_host[category] = @[subCategory]
   result["_INFERRED_TECH_STACKS"] = pack[TableRef[string, seq[string]]](final)
-  result["_INFERRED_TECH_STACKS_HOST"] = pack[TableRef[string, seq[string]]](final_host)
+  if hasResultsHost:
+    result["_INFERRED_TECH_STACKS_HOST"] = pack[TableRef[string, seq[string]]](final_host)
 
 proc loadtechStackGeneric*() =
-  let canLoad = chalkConfig.getUseTechStackDetection()
+  let canLoad = get_use_tech_stack_detection(chalkConfig)
   if not canLoad:
     trace("Skipping tech stack detection plugin")
     return
