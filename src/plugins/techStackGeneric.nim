@@ -213,7 +213,9 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
                   scanDirectory(head, category, subCategory)
         if detected[category][subCategory]:
             hasResults = true
-        if detectedHost[category][subcategory]:
+        if (contains(detectedHost, category) and
+            contains(detectedHost[category], subcategory) and
+            detectedHost[category][subcategory]):
             hasResultsHost = true
 
   if hasResults or hasResultsHost:
@@ -224,7 +226,9 @@ proc techStackGeneric*(self: Plugin, objs: seq[ChalkObj]):
                     final[category].add(subCategory)
                 else:
                     final[category] = @[subCategory]
-            if detectedHost[category][subCategory]:
+            if (contains(detectedHost, category) and
+                contains(detectedHost[category], subcategory) and
+                detectedHost[category][subcategory]):
                 if contains(final_host, category):
                     final_host[category].add(subCategory)
                 else:
@@ -248,9 +252,18 @@ proc loadtechStackGeneric*() =
     let category = val.getCategory()
     let subCategory = val.getSubcategory()
 
+
     let scope = val.getRuleScope()
     # We check host-level rules directly here at this
     # stage as we only iterate on paths of that rules for now
+    if scope == "HOST":
+        if not contains(detectedHost, category):
+            detectedHost[category] = newTable[string, bool]()
+        if val.fileScope != nil and val.fileScope.getFilepaths().isSome():
+            detectedHost[category][subCategory] = hostHasTechStack(val.getRegex(), val.fileScope.getFilepaths().get())
+        # do not add this rule to the cwd rules
+        continue
+
 
     if contains(categories, category):
         if contains(categories[category], subCategory):
@@ -264,14 +277,6 @@ proc loadtechStackGeneric*() =
         # to make for easier dropping of the values in the end
         detected[category] = newTable[string, bool]()
         detected[category][subCategory] = false
-        detectedHost[category] = newTable[string, bool]()
-        detectedHost[category][subCategory] = false
-
-        # but only scan for host tech at init, as we are iterating
-        # over the files only
-        if scope == "HOST":
-            if val.fileScope != nil and val.fileScope.getFilepaths().isSome():
-                detectedHost[category][subCategory] = hostHasTechStack(val.getRegex(), val.fileScope.getFilepaths().get())
 
     if val.fileScope != nil:
         headLimits[key] = val.fileScope.getHead()
