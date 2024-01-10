@@ -331,4 +331,4 @@ proc loadtechStackGeneric*() =
             ftRules[FT_ANY].incl(key)
         else:
             ftRules[FT_ANY] = toHashSet([key])
-  newPlugin("techStackGeneric", rtHostCallback = RunTimeHostCb(techStackGeneric))
+  newPlugin("techStackGeneric", ctHostCallback = ChalkTimeHostCb(techStackGeneric))
