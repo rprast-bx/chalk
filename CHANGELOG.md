@@ -2,6 +2,12 @@
 
 ## On the `main` branch
 
+### Breaking Changes
+
+- Tech stack plugin is removed and all its associated
+  configurations as well as keys.
+  ([#352](https://github.com/crashappsec/chalk/pull/352))
+
 ### Fixes
 
 - Chalk did not extract correct commit ID for git repos
